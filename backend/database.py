@@ -47,6 +47,7 @@ class HazardPost(Base):
     # Validation Status
     ai_validated = Column(Boolean, default=False)
     ai_confidence = Column(Float, default=0.0)
+    ai_relevance_score = Column(Float, default=0.0)  # Added relevance score
     ai_analysis = Column(Text, nullable=True)
     
     incois_validated = Column(Boolean, default=False)

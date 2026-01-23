@@ -44,6 +44,7 @@ class HazardPostResponse(BaseModel):
     watermarked_image_path: Optional[str]
     ai_validated: bool
     ai_confidence: float
+    ai_relevance_score: float
     incois_validated: bool
     verified: bool
     rejected: bool
@@ -109,6 +110,7 @@ class DashboardPost(BaseModel):
     location_name: Optional[str]
     watermarked_image_path: str
     ai_confidence: float
+    ai_relevance_score: float
     verified: bool
     timestamp: datetime
 

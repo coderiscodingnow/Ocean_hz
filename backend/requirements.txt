@@ -28,3 +28,7 @@ opencv-python-headless>=4.9.0.80
 
 # Date/Time
 python-dateutil==2.8.2
+
+# ML/AI
+torch
+transformers

@@ -4,6 +4,7 @@ from database import SessionLocal, HazardPost, ImageAnalysis
 from services.vision_service import vision_service
 from services.incois_service import incois_service
 from services.twilio_service import twilio_service
+from services.image_service import image_service
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -59,6 +60,17 @@ async def process_post_background(post_id: int):
             else:
                 post.rejected = False
             
+            # Relevance Score using BLIP
+            try:
+                # Construct target tag for BLIP
+                target_tag = f"{post.hazard_type.replace('_', ' ')} ocean hazard"
+                relevance_score = await image_service.validate_image_relevance(post.image_path, target_tag)
+                post.ai_relevance_score = relevance_score
+                logger.info(f"BLIP Relevance Score: {relevance_score}% for tag '{target_tag}'")
+            except Exception as e:
+                logger.error(f"BLIP validation failed: {e}")
+                post.ai_relevance_score = 0.0
+
             logger.info(f"AI validation complete: ocean_related={is_ocean}, "
                        f"hazard_detected={is_hazard}, rejected={post.rejected}")
             

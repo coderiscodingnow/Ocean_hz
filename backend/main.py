@@ -331,6 +331,7 @@ async def get_dashboard(db: Session = Depends(get_db)):
             location_name=post.location_name,
             watermarked_image_path=post.watermarked_image_path or post.image_path,
             ai_confidence=post.ai_confidence,
+            ai_relevance_score=post.ai_relevance_score,
             verified=post.verified,
             timestamp=post.timestamp
         )
@@ -540,6 +541,7 @@ async def sync_incois_alerts(db: Session = Depends(get_db)):
 @app.post("/api/offline/sync", response_model=SyncResponse)
 async def sync_offline_post(
     sync_data: OfflinePostSync,
+    background_tasks: BackgroundTasks = BackgroundTasks(),
     db: Session = Depends(get_db)
 ):
     """Sync offline post when network is restored"""
@@ -563,6 +565,15 @@ async def sync_offline_post(
         with open(fs_image_path, "wb") as f:
             f.write(image_data)
         
+        # Add watermark (same as online posts)
+        watermarked_path = await image_service.add_watermark(
+            fs_image_path, 
+            sync_data.location_name or "Unknown", 
+            sync_data.latitude, 
+            sync_data.longitude, 
+            timestamp
+        )
+        
         # Create post (similar to create_hazard_post but from offline data)
         post = HazardPost(
             user_id=sync_data.user_id,
@@ -573,8 +584,16 @@ async def sync_offline_post(
             longitude=sync_data.longitude,
             location_name=sync_data.location_name,
             image_path=image_path, # URL friendly path
+            watermarked_image_path=watermarked_path,
             timestamp=timestamp,
-            synced=True  # Now synced
+            synced=True,  # Now synced
+            # Initial validation state (will be updated by background task)
+            ai_validated=False,
+            ai_confidence=0.0,
+            ai_relevance_score=0.0,
+            incois_validated=False,
+            verified=False,
+            rejected=False
         )
         db.add(post)
         db.commit()
@@ -582,13 +601,14 @@ async def sync_offline_post(
         
         logger.info(f"Offline post synced: ID={post.id}")
         
-        # Trigger validation in background (would use background tasks in production)
-        # For now, just return success
+        # Trigger AI validation in background (same as online posts)
+        background_tasks.add_task(process_post_background, post.id)
+        logger.info(f"Background AI validation queued for offline post {post.id}")
         
         return SyncResponse(
             success=True,
             post_id=post.id,
-            message="Offline post synced successfully. Validation in progress."
+            message="Offline post synced successfully. AI validation in progress."
         )
         
     except Exception as e:
