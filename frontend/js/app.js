@@ -384,11 +384,11 @@ const App = {
             const displayTitle = (window.TranslationManager && window.TranslationManager.get(alert.titleKey)) || "Alert";
             const description = (window.TranslationManager && window.TranslationManager.get(alert.descKey)) || "No details.";
             const area = (window.TranslationManager && window.TranslationManager.get(alert.areaKey)) || "Unknown Area";
-            
+
             let timeStr = (window.TranslationManager && window.TranslationManager.get('just_now')) || "Just now";
-            if(alert.timeKey === 'min_ago') {
-                 const ago = (window.TranslationManager && window.TranslationManager.get('min_ago')) || "m ago";
-                 timeStr = `15${ago}`;
+            if (alert.timeKey === 'min_ago') {
+                const ago = (window.TranslationManager && window.TranslationManager.get('min_ago')) || "m ago";
+                timeStr = `15${ago}`;
             }
 
             const alertCard = document.createElement('div');

@@ -29,6 +29,7 @@ opencv-python-headless>=4.9.0.80
 # Date/Time
 python-dateutil==2.8.2
 
-# ML/AI
+# ML/AI (CPU-only for faster deployment)
+--extra-index-url https://download.pytorch.org/whl/cpu
 torch
 transformers
