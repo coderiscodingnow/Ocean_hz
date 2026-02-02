@@ -1,3 +1,4 @@
 # Netlify Rewrite Rule
 # Proxies all /api requests to the Railway Backend
 /api/*  https://blueguard-production.up.railway.app/api/:splat  200
+/uploads/*  https://blueguard-production.up.railway.app/uploads/:splat  200
