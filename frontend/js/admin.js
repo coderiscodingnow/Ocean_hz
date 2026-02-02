@@ -99,9 +99,13 @@ const AdminApp = {
             // Ensure timestamp is treated as UTC
             const timeStr = new Date(post.timestamp.endsWith('Z') ? post.timestamp : post.timestamp + 'Z').toLocaleString();
 
+            // Safer values for display
+            const aiConfVal = post.ai_confidence !== undefined ? post.ai_confidence : 0;
+            const blipVal = post.ai_relevance_score !== undefined ? post.ai_relevance_score : 0;
+
             card.innerHTML = `
                 <div style="display:flex; gap: 20px; flex-wrap: wrap;">
-                    <img src="${imageUrl}" style="width: 200px; height: 150px; object-fit: cover; border-radius: 8px; background: #000;">
+                    <img src="${imageUrl}" style="width: 200px; height: 150px; object-fit: cover; border-radius: 8px; background: #000;" onerror="console.error('Failed to load image:', '${imageUrl}')">
                     <div style="flex:1; min-width: 200px;">
                         <div style="display:flex; justify-content:space-between; margin-bottom: 10px;">
                             <h4 style="margin:0">${hazardName}</h4>
@@ -116,20 +120,20 @@ const AdminApp = {
                         </p>
                         
                         <div style="margin-top: 10px; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 6px; font-size: 0.9rem; border: 1px solid var(--border);">
-                            <strong>🤖 AI Analysis:</strong> Confidence ${(post.ai_confidence * 100).toFixed(1)}%
+                            <strong>🤖 AI Analysis:</strong> Confidence ${(aiConfVal * 100).toFixed(1)}%
                         </div>
                         
-                        <div style="margin-top: 10px; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 6px; font-size: 0.9rem; border: 1px solid ${post.ai_relevance_score < 50 ? 'var(--error)' : 'var(--border)'};">
+                        <div style="margin-top: 10px; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 6px; font-size: 0.9rem; border: 1px solid ${blipVal < 50 ? 'var(--error)' : 'var(--border)'};">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
                                 <strong>🎯 BLIP Relevance Score:</strong>
-                                <span style="font-weight: bold; color: ${post.ai_relevance_score >= 70 ? 'var(--success)' : post.ai_relevance_score >= 50 ? 'var(--warning)' : 'var(--error)'};">
-                                    ${post.ai_relevance_score ? post.ai_relevance_score.toFixed(1) : '0.0'}%
+                                <span style="font-weight: bold; color: ${blipVal >= 70 ? 'var(--success)' : blipVal >= 50 ? 'var(--warning)' : 'var(--error)'};">
+                                    ${blipVal.toFixed(1)}%
                                 </span>
                             </div>
                             <div style="width: 100%; height: 8px; background: rgba(0,0,0,0.3); border-radius: 4px; overflow: hidden;">
-                                <div style="width: ${post.ai_relevance_score || 0}%; height: 100%; background: ${post.ai_relevance_score >= 70 ? 'var(--success)' : post.ai_relevance_score >= 50 ? 'var(--warning)' : 'var(--error)'}; transition: width 0.3s;"></div>
+                                <div style="width: ${blipVal}%; height: 100%; background: ${blipVal >= 70 ? 'var(--success)' : blipVal >= 50 ? 'var(--warning)' : 'var(--error)'}; transition: width 0.3s;"></div>
                             </div>
-                            ${post.ai_relevance_score < 50 ? `
+                            ${blipVal < 50 ? `
                                 <div style="margin-top: 8px; padding: 6px 10px; background: rgba(239, 68, 68, 0.15); border-left: 3px solid var(--error); border-radius: 4px;">
                                     <strong style="color: var(--error);">⚠️ WARNING:</strong> 
                                     <span style="color: var(--error); font-size: 0.85rem;">Low relevance score - Image may not match reported hazard category</span>
